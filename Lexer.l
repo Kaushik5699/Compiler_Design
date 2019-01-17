@@ -2,10 +2,11 @@
 %}
 identifier [a-zA-Z][a-zA-Z0-9]*
 %%
-"//".* {printf("Single Line comment %s",yytext);}
-"/*"([^*]|\*+[^*/])*\*+"/" { printf("Multiline comment '%s'",yytext);}
-"/*"([^*]|\*+[^*/])*\* {printf("Error comment '%s'",yytext);}
-#.* {printf("\n%s is a preprocessor directive",yytext);}
+"//".* {printf("Single Line comment %s\n",yytext);}
+"/*"([^*]|\*+[^*/])*\*+"/" { printf("Multiline comment '%s'\n",yytext);}
+"/*"([^*]|\*+[^*/])*\* {printf("Error comment '%s'\n",yytext);}
+#define {printf("This is defintion for a variable %s\n",yytext);}
+#.* {printf("\n%s is a preprocessor directive\n",yytext);}
 int |
 float |
 typedef |
@@ -28,23 +29,25 @@ switch |
 return |
 else |
 struct |
-goto {printf("\n\t%s is a keyword",yytext);}
-{identifier}\( {printf("\nUser defined function:\n\t%s",yytext);}
+goto {printf("\n\t%s is a keyword\n",yytext);}
+main\( {printf("Main function:\n\t%s\n",yytext);}
+\".*\" {printf("\n\t %s is a string",yytext);}
+{identifier}\( {printf("\nUser defined function:\t%s\n",yytext);}
 {identifier}(\[[0-9]*\])? { printf("\n %s is an identifier:",yytext);}
 
 [0-9]+ {printf("%s is a Integer Constant\n",yytext);};
 
 \)(\:)? {printf("\n\t");ECHO;printf("\n");}
 \( ECHO;
-= {printf("\n\t %s is an assignment operator",yytext);}
+= {printf("\n\t %s is an assignment operator\n",yytext);}
 \<= |
 \>= |
 \< |
 == |
 \> |
-!= { printf("\n\t%s is a relational operator",yytext);}
-\{  {printf("\n %s Indentation",yytext);}
-\}  {printf("Indentation %s",yytext);}
+!= { printf("\n\t%s is a relational operator\n",yytext);}
+\{  {printf("\n %s Indentation\n",yytext);}
+\}  {printf("Indentation %s\n",yytext);}
 \+ |
 \* |
 \/ |
@@ -55,7 +58,7 @@ goto {printf("\n\t%s is a keyword",yytext);}
 \-= |
 \*= |
 \/= |
-\%= {printf("%s is an arithemetic operator",yytext);}
+\%= {printf("%s is an arithemetic operator\n",yytext);}
 \&& |
 \! |
 \& |
@@ -63,7 +66,7 @@ goto {printf("\n\t%s is a keyword",yytext);}
 \<< |
 \>> |
 \~ |
-\^ | {printf("%s is a comparative operator",yytext);}
+\^ | {printf("%s is a comparative operator\n",yytext);}
 %%
 int main(int argc, char **argv)
 {
