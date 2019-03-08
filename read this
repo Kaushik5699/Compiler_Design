@@ -1,0 +1,11 @@
+Run the files in terminal in this order
+
+1. yacc -d project.y
+2. lex project.l
+3. gcc -o a.out y.tab.c lex.yy.c -lfl -lm
+4. ./a.out < inp
+
+
+inp.c has a c file with error
+
+you can check that error at line 60 and 61
