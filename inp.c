@@ -3,11 +3,9 @@ int main()
 {
 
     
-    char c = "h";
+    char c = 'h';
 
-    int b=8;
-
-    printf("%d", a);
+    int b= 1;
 
     return 0;
 

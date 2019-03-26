@@ -1,68 +1,93 @@
-%option yylineno
-
 %{
-	#include<stdio.h>
-	#include"y.tab.h"
-	#include<math.h>
-	#include "symbol_table.h"
-	
-	entry_t** stable;
-  	entry_t** ctable;
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <limits.h>
+
+#include "y.tab.h"
+entry_t** constant_table;
+
+int cmnt_strt = 0;
+
 %}
 
-%%
-"#include"([ ]+)?((<(\\.|[^>])+>)|(\"(\\.|[^"])+\"))					                                    {insert(stable,yytext,1);}
-"#define"[ ]+[a-zA-z_][a-zA-z_0-9]* 																	    {insert(stable,yytext,2);}
-"auto"|"register"|"static"|"extern"|"typedef"																{insert(stable,yytext,3);}
-"void"|"char"|"short"|"int"|"long"|"float"|"double"|"signed"|"unsigned"										{insert(stable,yytext,3);}	
-"const"|"volatile"																							{insert(stable,yytext,3);}
-"enum"																										{insert(stable,yytext,3);}
-"case"																										{insert(stable,yytext,3);}	
-"default"																									{insert(stable,yytext,3);}
-"if"																										{insert(stable,yytext,3);}
-"switch"																									{insert(stable,yytext,3);}
-"else"																										{insert(stable,yytext,3);}
-"for"																										{insert(stable,yytext,3);}
-"do"																										{insert(stable,yytext,3);}
-"while"																										{insert(stable,yytext,3);}
-"goto"																										{insert(stable,yytext,3);}
-"continue"																									{insert(stable,yytext,3);}
-"break"																										{insert(stable,yytext,3);}
-"struct"|"union"																							{insert(stable,yytext,3);}
-"return"																									{insert(stable,yytext,3);}
-"sizeof"																									{insert(stable,yytext,3);}
-"||" 																										{}
-"&&"																										{}
-"..."																										{}
-"=="|"!="																									{}
-"<="|">="																									{}
-">>"|"<<"																									{}
-"++"|"--"																									{}
-"->"																										{}
-";"|"="|","|"{"|"}"|"("|")"|"["|"]"|"*"|"+"|"-"|"/"|"?"|":"|"&"|"|"|"^"|"!"|"~"|"%"|"<"|">"					{}
-"*="|"/="|"+="|"%="|">>="|"-="|"<<="|"&="|"^="|"|="															{}
-[0-9]+																									{insert(ctable,yytext,1);}
-[0-9]+"."[0-9]+																						{insert(ctable,yytext,2);}	
-"'"."'"																										{}
-[a-zA-z_][a-zA-z_0-9]*			 																			{insert(stable,yytext,15);}
-\"(\\.|[^\"])*\"																							{insert(ctable,yytext,3);}
-"//"(\\.|[^\n])*[\n]																						;
-[/][*]([^*]|[*]*[^*/])*[*]+[/]                                                                              ;
-[ \t\n]																										;
-%%
+letter [a-zA-Z]
+digit [0-9]
+ws  [ \t\r\f\v]+
+identifier (_|{letter})({letter}|{digit}|_){0,31}
+hex [0-9a-f]
 
-int yywrap(void)
-{
-    return 1;
-}
+ /* Exclusive states */
+%x CMNT
 
-int main(){
-	yyin=fopen("inp.c","r");
-	stable=create_table();
-  	ctable=create_table();
-  	yylex();
-	printf("\n\tSymbol table");
-  	display(stable);
-  	printf("\n\tConstants Table");
-  	display(ctable);
-}
+%%
+  /* Keywords*/
+"int"                             {return INT;}
+"char"                            {return CHAR;}
+"float"                           {return FLOAT;}
+"void"                            {return VOID;}
+"long"                            {return LONG;}
+"long long"                       {return LONG_LONG;}
+"short"                           {return SHORT;}
+"signed"                          {return SIGNED;}
+"unsigned"                        {return UNSIGNED;}
+"for"                             {return FOR;}
+"while"                           {return WHILE;}
+"break"                           {return BREAK;}
+"continue"                        {return CONTINUE;}
+"if"                              {return IF;}
+"else"                            {return ELSE;}
+"return"                          {return RETURN;}
+
+{identifier}                      {return  IDENTIFIER;}
+{ws}                              ;
+[+\-]?[0][x|X]{hex}+[lLuU]?       { yylval.entry = insert(constant_table,yytext,(int)strtol(yytext, NULL, 16),INT); return  HEX_CONSTANT;}
+'({letter}|{digit})'              { yylval.entry = insert(constant_table,yytext,yytext[1],CHAR); return CHAR_CONSTANT;}
+[+\-]?{digit}+[lLuU]?             { yylval.entry = insert(constant_table,yytext,atoi(yytext),INT); return  DEC_CONSTANT;}
+[+\-]?{digit}*\.{digit}+          { yylval.entry = insert(constant_table,yytext,atof(yytext),FLOAT); return FLOAT_CONSTANT;}
+
+"/*"                              {cmnt_strt = yylineno; BEGIN CMNT;}
+<CMNT>.|{ws}                      ;
+<CMNT>\n                          {yylineno++;}
+<CMNT>"*/"                        {BEGIN INITIAL;}
+<CMNT>"/*"                        {printf("Line %3d: Nested comments are not valid!\n",yylineno);}
+<CMNT><<EOF>>                     {printf("Line %3d: Unterminated comment\n", cmnt_strt); yyterminate();}
+
+"//".*                            ;
+
+\"[^\"\n]*\"                      {
+                                    if(yytext[yyleng-2]=='\\') /* check if it was an escaped quote */
+                                    {
+                                      yyless(yyleng-1);       /* push the quote back if it was escaped */
+                                      yymore();
+                                    }
+                                    else
+                                    {
+                                      insert(constant_table,yytext,INT_MAX,STRING);
+                                      return STRING;
+                                    }
+                                  }
+
+\"[^\"\n]*$                     {printf("Line %3d: Unterminated string %s\n",yylineno,yytext);}
+{digit}+({letter}|_)+	          {printf("Line %3d: Illegal identifier name %s\n",yylineno,yytext);}
+\n                              {yylineno++;}
+
+"--"			                {return DECREMENT;}
+"++"			                {return INCREMENT;}
+"+="                      {return ADD_ASSIGN;}
+"-="                      {return SUB_ASSIGN;}
+"*="                      {return MUL_ASSIGN;}
+"/="                      {return DIV_ASSIGN;}
+"%="                      {return MOD_ASSIGN;}
+
+
+"&&"			                {return LOGICAL_AND;}
+"||"			                {return LOGICAL_OR;}
+"<="			                {return LS_EQ;}
+">="			                {return GR_EQ;}
+"=="			                {return EQ;}
+"!="		                  {return NOT_EQ;}
+
+.                         {return yytext[0];}
+
+%%

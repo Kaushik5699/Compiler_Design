@@ -45,83 +45,100 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    int_const = 258,
-    char_const = 259,
-    float_const = 260,
-    id = 261,
-    string = 262,
-    enumeration_const = 263,
-    storage_const = 264,
-    type_const = 265,
-    qual_const = 266,
-    struct_const = 267,
-    enum_const = 268,
-    DEFINE = 269,
-    IF = 270,
-    FOR = 271,
-    DO = 272,
-    WHILE = 273,
-    BREAK = 274,
-    SWITCH = 275,
-    CONTINUE = 276,
-    RETURN = 277,
-    CASE = 278,
-    DEFAULT = 279,
-    GOTO = 280,
-    SIZEOF = 281,
-    PUNC = 282,
-    or_const = 283,
-    and_const = 284,
-    eq_const = 285,
-    shift_const = 286,
-    rel_const = 287,
-    inc_const = 288,
-    point_const = 289,
-    param_const = 290,
-    ELSE = 291,
-    HEADER = 292
+    IDENTIFIER = 258,
+    DEC_CONSTANT = 259,
+    HEX_CONSTANT = 260,
+    CHAR_CONSTANT = 261,
+    FLOAT_CONSTANT = 262,
+    STRING = 263,
+    LOGICAL_AND = 264,
+    LOGICAL_OR = 265,
+    LS_EQ = 266,
+    GR_EQ = 267,
+    EQ = 268,
+    NOT_EQ = 269,
+    MUL_ASSIGN = 270,
+    DIV_ASSIGN = 271,
+    MOD_ASSIGN = 272,
+    ADD_ASSIGN = 273,
+    SUB_ASSIGN = 274,
+    INCREMENT = 275,
+    DECREMENT = 276,
+    SHORT = 277,
+    INT = 278,
+    LONG = 279,
+    LONG_LONG = 280,
+    SIGNED = 281,
+    UNSIGNED = 282,
+    CONST = 283,
+    VOID = 284,
+    CHAR = 285,
+    FLOAT = 286,
+    IF = 287,
+    FOR = 288,
+    WHILE = 289,
+    CONTINUE = 290,
+    BREAK = 291,
+    RETURN = 292,
+    UMINUS = 293,
+    LOWER_THAN_ELSE = 294,
+    ELSE = 295
   };
 #endif
 /* Tokens.  */
-#define int_const 258
-#define char_const 259
-#define float_const 260
-#define id 261
-#define string 262
-#define enumeration_const 263
-#define storage_const 264
-#define type_const 265
-#define qual_const 266
-#define struct_const 267
-#define enum_const 268
-#define DEFINE 269
-#define IF 270
-#define FOR 271
-#define DO 272
-#define WHILE 273
-#define BREAK 274
-#define SWITCH 275
-#define CONTINUE 276
-#define RETURN 277
-#define CASE 278
-#define DEFAULT 279
-#define GOTO 280
-#define SIZEOF 281
-#define PUNC 282
-#define or_const 283
-#define and_const 284
-#define eq_const 285
-#define shift_const 286
-#define rel_const 287
-#define inc_const 288
-#define point_const 289
-#define param_const 290
-#define ELSE 291
-#define HEADER 292
+#define IDENTIFIER 258
+#define DEC_CONSTANT 259
+#define HEX_CONSTANT 260
+#define CHAR_CONSTANT 261
+#define FLOAT_CONSTANT 262
+#define STRING 263
+#define LOGICAL_AND 264
+#define LOGICAL_OR 265
+#define LS_EQ 266
+#define GR_EQ 267
+#define EQ 268
+#define NOT_EQ 269
+#define MUL_ASSIGN 270
+#define DIV_ASSIGN 271
+#define MOD_ASSIGN 272
+#define ADD_ASSIGN 273
+#define SUB_ASSIGN 274
+#define INCREMENT 275
+#define DECREMENT 276
+#define SHORT 277
+#define INT 278
+#define LONG 279
+#define LONG_LONG 280
+#define SIGNED 281
+#define UNSIGNED 282
+#define CONST 283
+#define VOID 284
+#define CHAR 285
+#define FLOAT 286
+#define IF 287
+#define FOR 288
+#define WHILE 289
+#define CONTINUE 290
+#define BREAK 291
+#define RETURN 292
+#define UMINUS 293
+#define LOWER_THAN_ELSE 294
+#define ELSE 295
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+
+union YYSTYPE
+{
+#line 31 "parser.y" /* yacc.c:1909  */
+
+	int data_type;
+	entry_t* entry;
+
+#line 139 "y.tab.h" /* yacc.c:1909  */
+};
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
